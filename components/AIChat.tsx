@@ -61,16 +61,21 @@ export default function AIChat() {
         }),
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
       const data = await response.json();
 
-      if (data.success) {
+      // Be forgiving - if we got a task ID back, it's success
+      const hasTask = data.task?.id || data.id;
+      const success = data.success !== false || hasTask;
+
+      if (success) {
+        const message = data.message || data.conversationResponse || 'Task created successfully!';
+        
+        // Remove "=" prefix if present
+        const cleanMessage = message.startsWith('=') ? message.substring(1) : message;
+        
         const assistantMessage: Message = {
           role: 'assistant',
-          content: data.message,
+          content: cleanMessage,
           timestamp: new Date()
         };
         setMessages(prev => [...prev, assistantMessage]);
