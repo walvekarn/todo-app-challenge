@@ -19,6 +19,7 @@ A modern, feature-rich todo application built with Next.js 14, TypeScript, Tailw
 - 🎯 **Priority Levels** - Assign High (🔴), Medium (🟡), or Low (🟢) priority with color-coded badges
 - 📅 **Due Dates** - Set deadlines with visual indicators for overdue, today, and upcoming tasks
 - 🔍 **Real-time Search** - Instantly search tasks by title or description
+- 🤖 **AI-Powered Chatbot** - Create tasks using natural language with N8N + OpenAI integration
 
 ### UI/UX Highlights
 - 📱 Fully responsive design (mobile, tablet, desktop)
@@ -48,6 +49,7 @@ npm install
 cat > .env.local << 'EOF'
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_url_here
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key_here
+NEXT_PUBLIC_N8N_CHAT_WEBHOOK=your_n8n_webhook_url_here
 EOF
 
 # Run development server
@@ -56,13 +58,15 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-## 📦 For Recruiters/Reviewers
+## 💡 Technical Highlights
 
 ### What This Project Demonstrates
 - ✅ **Full-stack development** with Next.js 14 (App Router) + TypeScript
 - ✅ **Database design and integration** with Supabase/PostgreSQL
 - ✅ **Modern React patterns** - hooks, client components, state management
 - ✅ **UI/UX design** with Tailwind CSS and responsive layouts
+- ✅ **Workflow automation** with N8N for AI task processing
+- ✅ **AI integration** with OpenAI GPT-3.5 for natural language understanding
 - ✅ **Professional code organization** and comprehensive documentation
 - ✅ **Production-ready** deployment configuration
 
@@ -70,6 +74,7 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 1. **Priority System** - Visual task prioritization with color-coded badges (High/Medium/Low)
 2. **Due Date Tracking** - Smart deadline management with overdue detection and status indicators
 3. **Real-time Search** - Instant task filtering across title and description fields
+4. **AI Chatbot** - Natural language task creation powered by N8N workflows and OpenAI GPT-3.5
 
 ### Code Quality Highlights
 - TypeScript for complete type safety
@@ -80,11 +85,12 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 - Optimistic UI updates for better user experience
 
 ### Development Stats
-- **Development Time**: ~8-10 hours
-- **Documentation**: ~2 hours
-- **Testing & Refinement**: ~1 hour
-- **Total Components**: 4 main components
-- **Total Lines**: ~2,000 lines of TypeScript/TSX
+- **Development Time**: ~12-14 hours (including AI chatbot)
+- **Documentation**: ~3 hours
+- **Testing & Refinement**: ~2 hours
+- **Total Components**: 5 main components (including AIChat)
+- **Total Lines**: ~2,500 lines of TypeScript/TSX
+- **N8N Workflows**: 1 active workflow with 5 nodes
 
 ## 🗄️ Database Setup
 
@@ -130,6 +136,7 @@ to_do_list_test/
 │   ├── AddTaskForm.tsx         # Create tasks with priority & due date
 │   ├── TodoItem.tsx            # Task display with edit/delete
 │   ├── SearchBar.tsx           # Real-time search component
+│   ├── AIChat.tsx              # AI chatbot interface
 │   └── ThemeProvider.tsx       # Theme context provider
 ├── lib/
 │   ├── supabase.ts             # Supabase client
@@ -149,6 +156,8 @@ to_do_list_test/
 | [TypeScript](https://www.typescriptlang.org/) | Type safety | 5.x |
 | [Tailwind CSS](https://tailwindcss.com/) | Styling | 3.3.0 |
 | [Supabase](https://supabase.com/) | Backend & Database | Latest |
+| [N8N](https://n8n.io/) | Workflow automation | Cloud |
+| [OpenAI](https://openai.com/) | AI language model | GPT-3.5 Turbo |
 
 ## 📦 Deployment
 
@@ -159,11 +168,61 @@ to_do_list_test/
 3. Add environment variables in Vercel dashboard:
    - `NEXT_PUBLIC_SUPABASE_URL`
    - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+   - `NEXT_PUBLIC_N8N_CHAT_WEBHOOK`
 4. Deploy!
 
 ### Other Platforms
 
 Works with: Netlify, AWS Amplify, Railway, Render
+
+## 🤖 AI Chatbot Feature
+
+### How It Works
+
+The app includes an AI-powered chatbot that creates tasks from natural language. Just describe what you need to do, and the AI will:
+
+1. **Parse your message** - Understand the task, urgency, and timing
+2. **Enhance the title** - Make it clear and actionable
+3. **Extract details** - Detect priority (high/medium/low) and due dates
+4. **Create the task** - Automatically add it to your list
+
+### Usage Examples
+
+**Simple Task:**
+```
+You: "buy groceries"
+AI: ✅ Task added: Purchase groceries at store
+```
+
+**Task with Date:**
+```
+You: "buy groceries tomorrow"
+AI: ✅ Created task: Purchase groceries (Due tomorrow)
+```
+
+**Urgent Task:**
+```
+You: "urgent client meeting Friday at 2pm"
+AI: ✅ High priority: Client meeting Friday at 2 PM
+```
+
+### Architecture
+
+```
+User types message → Next.js Frontend → N8N Workflow → OpenAI GPT-3.5 → Supabase Database
+```
+
+The workflow uses:
+- **N8N** for workflow orchestration
+- **OpenAI GPT-3.5 Turbo** for natural language understanding
+- **Supabase** for data storage
+
+### Setup
+
+See `Challenge_info/QUICK_START.md` for complete setup instructions including:
+1. N8N workflow configuration
+2. Environment variable setup
+3. Testing procedures
 
 ## 🧪 Testing Features
 
@@ -182,6 +241,14 @@ Works with: Netlify, AWS Amplify, Railway, Render
 2. Results filter in real-time
 3. Search works on both title and description
 4. Click X to clear search
+
+### AI Chatbot
+1. Look for the floating purple button (bottom-right corner)
+2. Click to open the chat window
+3. Type: "buy groceries tomorrow" or "urgent meeting Friday"
+4. Press Enter to send
+5. AI responds with confirmation
+6. Page refreshes automatically to show the new task
 
 ## 🔒 Privacy & Data
 

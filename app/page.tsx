@@ -7,6 +7,7 @@ import { getUserIdentifier } from '@/lib/userIdentifier';
 import AddTaskForm from '@/components/AddTaskForm';
 import TodoItem from '@/components/TodoItem';
 import SearchBar from '@/components/SearchBar';
+import AIChat from '@/components/AIChat';
 
 type FilterType = 'all' | 'active' | 'completed';
 
@@ -195,6 +196,9 @@ export default function Home() {
           <p>Refresh to Sync</p>
         </footer>
       </div>
+
+      {/* AI Chatbot */}
+      <AIChat />
     </main>
   );
 }
