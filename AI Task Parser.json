@@ -1,0 +1,203 @@
+{
+  "name": "AI Task Parser",
+  "nodes": [
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-3.5-turbo",
+          "mode": "list",
+          "cachedResultName": "GPT-3.5-TURBO"
+        },
+        "responses": {
+          "values": [
+            {
+              "role": "system",
+              "content": "=You are a task management assistant. \n\nYour ONLY job is to return valid JSON. Do NOT write any other text.\n\nParse the user's message and return THIS EXACT JSON FORMAT:\n{\n  \"title\": \"clear task title\",\n  \"priority\": \"medium\",\n  \"dueDate\": null,\n  \"response\": \"Task created\"\n}\n\nRules:\n1. ALWAYS return valid JSON\n2. NO explanations\n3. NO markdown code blocks\n4. NO extra text before or after\n5. JUST the JSON object\n\nPriority detection:\n- \"urgent\", \"asap\", \"important\" = \"high\"\n- \"someday\", \"maybe\", \"later\" = \"low\"\n- everything else = \"medium\"\n\nDate handling (for now, always return null):\n- \"dueDate\": null\n\nExample input: \"buy groceries\"\nExample output: {\"title\":\"Purchase groceries at store\",\"priority\":\"medium\",\"dueDate\":null,\"response\":\"✅ Task added: Purchase groceries\"}\n\nExample input: \"urgent client meeting\"\nExample output: {\"title\":\"Client meeting\",\"priority\":\"high\",\"dueDate\":null,\"response\":\"✅ High priority task created\"}\n\nCRITICAL: Return ONLY the JSON object. NO other text."
+            },
+            {
+              "content": "=={{ $json.body.message }}"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.1,
+      "position": [
+        208,
+        0
+      ],
+      "id": "d521fb51-959f-4f01-8b9f-15c77a253d54",
+      "name": "Message a model",
+      "credentials": {
+        "openAiApi": {
+          "id": "YKjtsjIVMaMDM2Cv",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get AI response from N8N's OpenAI node structure\nconst aiOutput = $input.first().json;\n\n// Extract the text content\nlet aiText;\nif (aiOutput.output && aiOutput.output[0] && aiOutput.output[0].content) {\n  aiText = aiOutput.output[0].content[0].text;\n} else if (aiOutput.text) {\n  aiText = aiOutput.text;\n} else {\n  throw new Error('Could not find AI response in output');\n}\n\n// Parse the JSON response\nconst parsed = JSON.parse(aiText);\n\n// Get user ID from webhook (use correct N8N reference)\nconst webhookData = $('Webhook Trigger').first().json;\nconst userId = webhookData.body.userId || 'user_' + Date.now();\n\n// Return formatted data for Supabase\nreturn {\n  json: {\n    user_identifier: userId,\n    title: parsed.title,\n    priority: parsed.priority || 'medium',\n    due_date: parsed.dueDate || null,\n    description: 'Created via AI chatbot',\n    is_completed: false,\n    conversationResponse: parsed.response || 'Task created successfully!'\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        560,
+        0
+      ],
+      "id": "e7419564-2e31-40ec-a802-57b9729da112",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "tableId": "tasks",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "user_identifier",
+              "fieldValue": "={{ $json.user_identifier }}"
+            },
+            {
+              "fieldId": "title",
+              "fieldValue": "={{ $json.title }}"
+            },
+            {
+              "fieldId": "priority",
+              "fieldValue": "={{ $json.priority === 'high' ? 'high' : $json.priority === 'low' ? 'low' : 'medium' }}"
+            },
+            {
+              "fieldId": "description",
+              "fieldValue": "={{$json.description}}"
+            },
+            {
+              "fieldId": "is_completed",
+              "fieldValue": "={{ $json.is_completed }}"
+            },
+            {
+              "fieldId": "due_date",
+              "fieldValue": "={{ $json.due_date || null }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        768,
+        0
+      ],
+      "id": "fcf21d67-9bc1-4531-be68-7fb4e5413758",
+      "name": "Create a row",
+      "credentials": {
+        "supabaseApi": {
+          "id": "BLxzNMQPSHzWCxjl",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"success\": true,\n  \"message\": \"={{ $('Code in JavaScript').item.json.conversationResponse }}\",\n  \"task\": {\n    \"id\": \"={{ $json.id }}\",\n    \"title\": \"={{ $json.title }}\",\n    \"priority\": \"={{ $json.priority }}\"\n  }\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        976,
+        0
+      ],
+      "id": "780d1d93-cd62-43a9-9bfd-34bd905f0c9a",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "chat",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*",
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "df7f2592-934d-4c4f-8411-101b23816fe5",
+      "name": "Webhook Trigger",
+      "webhookId": "bc4adffb-0124-4360-b781-df50eb2c4618"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Create a row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a row": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook Trigger": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "4a5d21ef-be9e-47f7-8844-070e1ba5ec41",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "cc4085c3fb838fc746f6011daebbcf4971c945e230dfdaf795146a9b3c7e7f38"
+  },
+  "id": "I2VkCkIapHDjMQRv09Kgo",
+  "tags": []
+}
