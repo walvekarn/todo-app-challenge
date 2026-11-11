@@ -1,6 +1,8 @@
-# 📝 Advanced Todo App
+Status: Deployed demo (todo-app-challenge-two.vercel.app). Side project: natural-language task intake with n8n and OpenAI, built with AI-assisted development.
 
-A modern, feature-rich todo application built with Next.js 14, TypeScript, Tailwind CSS, and Supabase. This project showcases professional-grade task management with 3 advanced features beyond basic CRUD operations.
+# Advanced Todo App
+
+A modern, feature-rich todo application built with Next.js 14, TypeScript, Tailwind CSS, and Supabase. It adds 3 features beyond basic CRUD operations.
 
 ![Status](https://img.shields.io/badge/status-active-success.svg)
 ![Version](https://img.shields.io/badge/version-2.0.0-blue.svg)
